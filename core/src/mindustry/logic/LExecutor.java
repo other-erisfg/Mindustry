@@ -1035,6 +1035,55 @@ public class LExecutor{
         }
     }
 
+    /* TODO: I'm going to lose my sanity making this. */
+
+     public static class EvalI implements LInstruction{
+        public int value;
+
+        public EvalI(int value){
+            this.value = value;
+        }
+
+        EvalI(){}
+
+        @Override
+        public void run(LExecutor exec){
+
+            if(exec.textBuffer.length() >= maxTextBuffer) return;
+
+            //this should avoid any garbage allocation
+            Var v = exec.var(value);
+            if(v.isobj && value != 0){
+                String strValue = toString(v.objval);
+
+                exec.textBuffer.append(strValue);
+            }else{
+                //display integer version when possible
+                if(Math.abs(v.numval - (long)v.numval) < 0.00001){
+                    exec.textBuffer.append((long)v.numval);
+                }else{
+                    exec.textBuffer.append(v.numval);
+                }
+            }
+        }
+
+        public static String toString(Object obj){
+            return
+                obj == null ? "null" :
+                obj instanceof String s ? s :
+                obj == Blocks.stoneWall ? "solid" : //special alias
+                obj instanceof MappableContent content ? content.name :
+                obj instanceof Content ? "[content]" :
+                obj instanceof Building build ? build.block.name :
+                obj instanceof Unit unit ? unit.type.name :
+                obj instanceof Enum<?> e ? e.name() :
+                obj instanceof Team team ? team.name :
+                "[object]";
+        }
+    }
+
+    
+
     public static class PrintFlushI implements LInstruction{
         public int target;
 
